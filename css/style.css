@@ -1,4 +1,5 @@
 /* Reset and CSS Variables */
+/* Reset and CSS Variables */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,6 +9,7 @@
 :root {
   --bg-body: #f4f5f7;
   --bg-container: #ffffff;
+  --bg-cream-white: #fafafb;
   --color-accent-yellow: #f3b917;
   --color-accent-yellow-hover: #e0a50b;
   --color-accent-dark: #2d2d2d;
@@ -36,9 +38,9 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  
+
   /* Modern clean geometric background grid */
-  background-image: 
+  background-image:
     radial-gradient(rgba(45, 45, 45, 0.04) 1px, transparent 1.5px),
     linear-gradient(rgba(45, 45, 45, 0.01) 1px, transparent 1px),
     linear-gradient(90deg, rgba(45, 45, 45, 0.01) 1px, transparent 1px);
@@ -50,13 +52,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-body);
 }
+
 ::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-accent-yellow);
 }
@@ -86,12 +91,15 @@ body {
     transform: translateY(105vh) translateX(0) scale(0.6);
     opacity: 0;
   }
+
   15% {
     opacity: 0.8;
   }
+
   85% {
     opacity: 0.8;
   }
+
   100% {
     transform: translateY(-10vh) translateX(var(--drift-x, 40px)) scale(1.1);
     opacity: 0;
@@ -198,8 +206,17 @@ body {
 }
 
 @keyframes pulseBorder {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.02); opacity: 1; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
 }
 
 .bio-avatar {
@@ -617,15 +634,15 @@ footer p {
     padding: 2rem 1.5rem;
     margin: 2rem auto;
   }
-  
+
   .bio-name {
     font-size: 1.8rem;
   }
-  
+
   .contact-card {
     padding: 1.5rem 1rem;
   }
-  
+
   .contact-card-inner {
     padding: 1rem;
   }
@@ -635,15 +652,15 @@ footer p {
     text-align: center;
     gap: 1.2rem;
   }
-  
+
   .contact-card-info {
     text-align: center;
   }
-  
+
   .contact-card-divider {
     margin: 0.3rem auto 0.8rem auto;
   }
-  
+
   .contact-card-photo-wrapper {
     margin: 0 auto;
   }
@@ -653,6 +670,7 @@ footer p {
   .container {
     padding: 1.5rem 1rem;
   }
+
   .container::before {
     top: 10px;
     left: 10px;
@@ -661,13 +679,14 @@ footer p {
     border-top-width: 3px;
     border-left-width: 3px;
   }
+
   .container::after {
     top: 10px;
     left: 45px;
     width: 6px;
     height: 6px;
   }
-  
+
   .bio-avatar-wrapper {
     width: 100px;
     height: 100px;
@@ -691,7 +710,8 @@ footer p {
   border-radius: 50%;
 }
 
-.bio-avatar, .contact-card-photo {
+.bio-avatar,
+.contact-card-photo {
   pointer-events: none;
   -webkit-user-drag: none;
   user-select: none;
@@ -699,11 +719,13 @@ footer p {
 }
 
 /* Typewriter Quote styles */
-.typewriter-quote, .typewriter-author {
+.typewriter-quote,
+.typewriter-author {
   font-family: 'Courier Prime', 'Courier New', Courier, monospace !important;
   font-weight: 500;
   display: inline-block;
-  min-height: 1.2em; /* Prevents layout shifting during typing */
+  min-height: 1.2em;
+  /* Prevents layout shifting during typing */
 }
 
 .typewriter-cursor {
@@ -715,6 +737,135 @@ footer p {
 }
 
 @keyframes typewriter-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Card Popup Overlay for Download Failures/In-App Browsers */
+.card-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(45, 45, 45, 0.7); /* gray 70% opacity background */
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* pop up from below */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.card-popup-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-popup-content {
+  background: var(--bg-container);
+  width: 100%;
+  max-width: 540px;
+  border-radius: 24px 24px 0 0;
+  padding: 2.5rem 2rem 3rem;
+  box-shadow: 0 -15px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15); /* springy slide up */
+  position: relative;
+  border-top: 4px solid var(--color-accent-yellow); /* Gold top accent border */
+}
+
+.card-popup-content::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 2px;
+}
+
+.card-popup-overlay.show .card-popup-content {
+  transform: translateY(0);
+}
+
+.card-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  background-color: #fafafb;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.card-popup-close:hover {
+  background-color: var(--color-accent-dark);
+  color: #ffffff;
+  border-color: var(--color-accent-dark);
+}
+
+.card-popup-instruction {
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-main);
+  margin-bottom: 0.3rem;
+  margin-top: 1rem;
+}
+
+.card-popup-subinstruction {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.8rem;
+}
+
+.card-popup-img-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+}
+
+.card-popup-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: auto !important; /* Enable image select & copy */
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+  -webkit-touch-callout: default !important; /* Show iOS context menu */
+  pointer-events: auto !important; /* Allow interactions */
 }
