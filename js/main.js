@@ -230,8 +230,11 @@ function setupCardDownload() {
  * Security: Disables right-click, devtools shortcuts, and image dragging
  */
 function setupSecurityRestrictions() {
-  // 1. Disable Right Click
+  // 1. Disable Right Click (exempting the fallback card popup image for long-press download)
   document.addEventListener('contextmenu', (e) => {
+    if (e.target && e.target.id === 'card-popup-img') {
+      return;
+    }
     e.preventDefault();
   }, false);
 
@@ -254,8 +257,11 @@ function setupSecurityRestrictions() {
     }
   }, false);
 
-  // 3. Disable Dragging of Images
+  // 3. Disable Dragging of Images (exempting the card popup image for drag-to-save)
   document.addEventListener('dragstart', (e) => {
+    if (e.target && e.target.id === 'card-popup-img') {
+      return;
+    }
     if (e.target.nodeName === 'IMG') {
       e.preventDefault();
     }
@@ -397,3 +403,4 @@ function setupTypewriterQuotes() {
   // Start sequence
   typeQuote();
 }
+
