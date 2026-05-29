@@ -97,13 +97,26 @@ function setupSharingAndActions() {
 function setupCardDownload() {
   const downloadBtn = document.getElementById('download-btn');
   const contactCard = document.getElementById('contact-card');
+  const popupOverlay = document.getElementById('card-popup-overlay');
+  const popupClose = document.getElementById('card-popup-close');
+  const popupImg = document.getElementById('card-popup-img');
 
   if (!downloadBtn || !contactCard) return;
 
-  downloadBtn.addEventListener('click', () => {
-    // Trigger loader state
-    downloadBtn.style.pointerEvents = 'none';
-    downloadBtn.style.opacity = '0.5';
+  // Setup popup close handlers
+  if (popupClose && popupOverlay) {
+    popupClose.addEventListener('click', () => {
+      popupOverlay.classList.remove('show');
+    });
+    popupOverlay.addEventListener('click', (e) => {
+      if (e.target === popupOverlay) {
+        popupOverlay.classList.remove('show');
+      }
+    });
+  }
+
+  function showCardPopup() {
+    if (!popupOverlay || !popupImg) return;
 
     // Use html2canvas to capture card with scale 3 for ultra-sharp prints
     html2canvas(contactCard, {
@@ -119,26 +132,96 @@ function setupCardDownload() {
         }
       }
     }).then(canvas => {
+      const dataUrl = canvas.toDataURL('image/png');
+      popupImg.src = dataUrl;
+      popupOverlay.classList.add('show');
+      
+      // Restore state
+      downloadBtn.style.pointerEvents = 'auto';
+      downloadBtn.style.opacity = '1';
+    }).catch(error => {
+      console.error('Error generating fallback contact card image:', error);
+      downloadBtn.style.pointerEvents = 'auto';
+      downloadBtn.style.opacity = '1';
+    });
+  }
+
+  // Detect embedded or in-app browser where standard downloads fail
+  function isInAppBrowser() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return (
+      (ua.indexOf("FBAN") > -1) || 
+      (ua.indexOf("FBAV") > -1) || 
+      (ua.indexOf("Instagram") > -1) || 
+      (ua.indexOf("Line/") > -1) || 
+      (ua.indexOf("MicroMessenger") > -1) || 
+      (ua.indexOf("WeChat") > -1) || 
+      (ua.indexOf("Twitter") > -1) || 
+      (ua.indexOf("Pinterest") > -1) || 
+      (ua.indexOf("Snapchat") > -1) || 
+      (ua.indexOf("LinkedInApp") > -1) ||
+      (ua.indexOf("Telegram") > -1) ||
+      (ua.indexOf("GSA") > -1) || // Google Search App
+      // Android WebView
+      (ua.indexOf("Version/") > -1 && ua.indexOf("Chrome/") > -1 && (ua.indexOf("wv") > -1 || ua.indexOf("Mobile Safari") > -1 && ua.indexOf("Browser") > -1)) ||
+      // iOS WebView
+      ((ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1 || ua.indexOf("iPod") > -1) && (ua.indexOf("Safari") === -1 && ua.indexOf("CriOS") === -1 && ua.indexOf("FxiOS") === -1))
+    );
+  }
+
+  downloadBtn.addEventListener('click', () => {
+    // Trigger loader state
+    downloadBtn.style.pointerEvents = 'none';
+    downloadBtn.style.opacity = '0.5';
+
+    // If in-app browser, direct download will fail, show the popup modal instead
+    if (isInAppBrowser()) {
+      showCardPopup();
+      return;
+    }
+
+    // Try standard download via html2canvas
+    html2canvas(contactCard, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: null,
+      logging: false,
+      onclone: (clonedDoc) => {
+        const clonedCard = clonedDoc.getElementById('contact-card');
+        if (clonedCard) {
+          clonedCard.style.transform = 'none';
+          clonedCard.style.boxShadow = 'none';
+        }
+      }
+    }).then(canvas => {
       canvas.toBlob((blob) => {
+        if (!blob) {
+          showCardPopup();
+          return;
+        }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'contact_card_joe_va.png';
         document.body.appendChild(a);
-        a.click();
         
-        // Cleanup
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        // Restore state
-        downloadBtn.style.pointerEvents = 'auto';
-        downloadBtn.style.opacity = '1';
+        try {
+          a.click();
+          // Restore state
+          downloadBtn.style.pointerEvents = 'auto';
+          downloadBtn.style.opacity = '1';
+        } catch (clickError) {
+          console.warn('Standard link click failed, falling back to popup:', clickError);
+          showCardPopup();
+        } finally {
+          // Cleanup
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
       }, 'image/png');
     }).catch(error => {
-      console.error('Error generating contact card PNG:', error);
-      downloadBtn.style.pointerEvents = 'auto';
-      downloadBtn.style.opacity = '1';
+      console.error('Error generating contact card PNG, falling back to popup:', error);
+      showCardPopup();
     });
   });
 }
